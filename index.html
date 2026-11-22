@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>白日梦想家 · 九卡博弈</title>
+
+    <!-- PWA -->
+    <meta name="theme-color" content="#0a0f1e">
+    <meta name="description" content="九张未知卡牌，一张底牌；在翻牌与出价之间，赌一次自己的判断。">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="九卡博弈">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
         * {
             box-sizing: border-box;
@@ -769,6 +780,17 @@
 
         resetGame();
     })();
+</script>
+
+<!-- PWA 注册 -->
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+            navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(function (e) {
+                console.warn('Service Worker 注册失败:', e);
+            });
+        });
+    }
 </script>
 </body>
 </html>
