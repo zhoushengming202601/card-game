@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>白日梦想家 · 九卡博弈</title>
     <style>
         * {
@@ -11,6 +11,7 @@
             padding: 0;
             user-select: none;
             font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -19,7 +20,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 16px;
         }
 
         .game-container {
@@ -27,20 +28,20 @@
             width: 100%;
             background: rgba(20, 25, 40, 0.8);
             backdrop-filter: blur(8px);
-            border-radius: 3rem;
-            padding: 2rem 1.5rem 2rem 1.5rem;
+            border-radius: 2.2rem;
+            padding: 1.6rem 1.2rem 1.6rem 1.2rem;
             box-shadow: 0 25px 40px -10px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 215, 0, 0.2);
             border: 1px solid rgba(255, 220, 100, 0.3);
         }
 
         .title {
             text-align: center;
-            font-size: 2.2rem;
+            font-size: 2rem;
             font-weight: 700;
             letter-spacing: 4px;
             color: #f5e6b0;
             text-shadow: 0 0 15px #ffd966, 0 0 30px #b8860b;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
             font-family: 'Times New Roman', serif;
             word-break: break-word;
         }
@@ -48,8 +49,8 @@
         .subtitle {
             text-align: center;
             color: #bfb37b;
-            font-size: 0.9rem;
-            margin-bottom: 1.8rem;
+            font-size: 0.8rem;
+            margin-bottom: 1.4rem;
             letter-spacing: 2px;
             font-style: italic;
         }
@@ -57,14 +58,14 @@
         .grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 1.2rem;
-            margin: 1.5rem 0 1.8rem;
+            gap: 0.9rem;
+            margin: 1rem 0 1.4rem;
         }
 
         .card {
             aspect-ratio: 3 / 4;
             background: linear-gradient(135deg, #2a2f42, #1b1f2b);
-            border-radius: 1.2rem;
+            border-radius: 1rem;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -91,13 +92,16 @@
             pointer-events: none;
         }
 
-        .card:hover::before {
-            opacity: 1;
+        @media (hover: hover) {
+            .card:hover::before { opacity: 1; }
+            .card:hover {
+                transform: translateY(-6px) scale(1.02);
+                box-shadow: 0 20px 30px -8px #000, 0 0 20px rgba(255, 215, 0, 0.3);
+            }
         }
 
-        .card:hover {
-            transform: translateY(-6px) scale(1.02);
-            box-shadow: 0 20px 30px -8px #000, 0 0 20px rgba(255, 215, 0, 0.3);
+        .card:active:not(.selected):not(.revealed) {
+            transform: scale(0.97);
         }
 
         .card.selected {
@@ -105,10 +109,6 @@
             transform: scale(1.02);
             cursor: default;
             background: linear-gradient(135deg, #3a3f5a, #252a3a);
-        }
-
-        .card.selected:hover {
-            transform: scale(1.02);
         }
 
         .card.revealed {
@@ -121,14 +121,8 @@
             opacity: 0.4;
         }
 
-        .card.disabled {
-            cursor: not-allowed;
-            opacity: 0.7;
-            transform: none;
-        }
-
         .card-number {
-            font-size: 3.5rem;
+            font-size: 2.6rem;
             font-weight: 800;
             color: #e6d9a8;
             text-shadow: 0 0 20px #ffd966, 0 0 5px #000;
@@ -138,26 +132,26 @@
         }
 
         .card-amount {
-            font-size: 1.8rem;
+            font-size: 1.4rem;
             font-weight: 900;
             color: #ffecb3;
             text-shadow: 0 0 20px #f0b300, 0 0 5px #000;
-            margin-top: 0.4rem;
+            margin-top: 0.3rem;
             z-index: 2;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
 
         .card-amount small {
-            font-size: 1rem;
+            font-size: 0.8rem;
             font-weight: 400;
             color: #b8a664;
-            margin-left: 2px;
+            margin-left: 1px;
         }
 
         .card-status {
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             color: #b9a86b;
-            margin-top: 0.5rem;
+            margin-top: 0.4rem;
             text-transform: uppercase;
             letter-spacing: 1px;
             z-index: 2;
@@ -165,16 +159,16 @@
 
         .info-panel {
             background: #0e121c;
-            border-radius: 2rem;
-            padding: 1.5rem 1.2rem;
-            margin: 1rem 0 1.2rem;
+            border-radius: 1.5rem;
+            padding: 1.1rem 1rem;
+            margin: 0.8rem 0 0.8rem;
             border: 1px solid #3b3f2c;
             box-shadow: inset 0 0 30px #00000055, 0 5px 10px #00000033;
         }
 
         .message-area {
-            font-size: 1.2rem;
-            min-height: 3.5rem;
+            font-size: 1rem;
+            min-height: 3rem;
             text-align: center;
             color: #ffefc0;
             display: flex;
@@ -182,42 +176,42 @@
             justify-content: center;
             font-weight: 500;
             background: #121724;
-            border-radius: 1.5rem;
-            padding: 0.8rem 1rem;
-            margin-bottom: 1.2rem;
-            border-left: 4px solid #ffd966;
-            border-right: 4px solid #ffd966;
-            letter-spacing: 0.5px;
+            border-radius: 1.2rem;
+            padding: 0.6rem 0.8rem;
+            margin-bottom: 0.9rem;
+            border-left: 3px solid #ffd966;
+            border-right: 3px solid #ffd966;
+            letter-spacing: 0.3px;
             box-shadow: 0 0 15px #00000055;
             word-break: break-word;
+            line-height: 1.4;
         }
 
         .bid-area {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 1rem;
+            gap: 0.6rem;
             flex-wrap: wrap;
         }
 
         .bid-box {
             background: #1b1f2b;
-            border-radius: 2rem;
-            padding: 0.6rem 1.5rem;
-            font-size: 1.8rem;
+            border-radius: 1.5rem;
+            padding: 0.5rem 1.2rem;
+            font-size: 1.4rem;
             font-weight: 800;
             color: #ffd966;
             border: 1px solid #b8860b;
             box-shadow: inset 0 0 15px #00000088, 0 0 15px #ffd96633;
-            min-width: 150px;
+            min-width: 120px;
             text-align: center;
         }
 
         .bid-label {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: #bdae76;
-            letter-spacing: 2px;
-            margin-right: 0.3rem;
+            letter-spacing: 1px;
         }
 
         .btn {
@@ -225,27 +219,29 @@
             border: 1px solid #bfa75c;
             color: #f5e6b0;
             font-weight: 700;
-            padding: 0.8rem 1.8rem;
-            border-radius: 3rem;
-            font-size: 1rem;
-            letter-spacing: 1px;
+            padding: 0.7rem 1.4rem;
+            border-radius: 2.5rem;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
             cursor: pointer;
             transition: all 0.2s;
-            box-shadow: 0 6px 0 #0a0c12, 0 8px 20px #00000080;
+            box-shadow: 0 5px 0 #0a0c12, 0 8px 20px #00000080;
             text-transform: uppercase;
         }
 
-        .btn:hover:not(:disabled) {
-            background: linear-gradient(145deg, #3f445a, #262b3c);
-            box-shadow: 0 4px 0 #0a0c12, 0 10px 20px #00000080;
-            transform: translateY(2px);
-            border-color: #ffd966;
-            color: #fff3cf;
+        @media (hover: hover) {
+            .btn:hover:not(:disabled) {
+                background: linear-gradient(145deg, #3f445a, #262b3c);
+                box-shadow: 0 4px 0 #0a0c12, 0 10px 20px #00000080;
+                transform: translateY(2px);
+                border-color: #ffd966;
+                color: #fff3cf;
+            }
         }
 
         .btn:active:not(:disabled) {
-            transform: translateY(6px);
-            box-shadow: 0 2px 0 #0a0c12, 0 5px 15px #000000;
+            transform: translateY(5px);
+            box-shadow: 0 1px 0 #0a0c12, 0 5px 15px #000000;
         }
 
         .btn:disabled {
@@ -260,19 +256,14 @@
             background: linear-gradient(145deg, #5d4e1a, #3d3310);
             border-color: #f5d742;
             color: #ffefc0;
-            box-shadow: 0 6px 0 #1e1a09, 0 8px 20px #000000;
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            background: linear-gradient(145deg, #7a6522, #4e4115);
-            border-color: #ffe066;
+            box-shadow: 0 5px 0 #1e1a09, 0 8px 20px #000000;
         }
 
         .action-buttons {
             display: flex;
-            gap: 1rem;
+            gap: 0.7rem;
             justify-content: center;
-            margin-top: 1rem;
+            margin-top: 0.8rem;
             flex-wrap: wrap;
         }
 
@@ -280,30 +271,77 @@
             background: #1e212b;
             border-color: #666;
             color: #aaa;
-            box-shadow: 0 4px 0 #0a0c12;
-            padding: 0.6rem 1.6rem;
-            font-size: 0.85rem;
-        }
-
-        .reset-btn:hover:not(:disabled) {
-            background: #2e3140;
-            color: #ddd;
+            box-shadow: 0 3px 0 #0a0c12;
+            padding: 0.5rem 1.2rem;
+            font-size: 0.75rem;
         }
 
         .footer-note {
             text-align: center;
             font-size: 0.7rem;
             color: #5a5e6b;
-            margin-top: 1.5rem;
-            letter-spacing: 1px;
+            margin-top: 0.6rem;
+            letter-spacing: 0.5px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.6rem;
+            align-items: center;
         }
 
-        /* 金额差异化视觉标记 */
+        .amount-pool {
+            display: inline-flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .pool-item {
+            color: #d4af37;
+            font-weight: 700;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            padding: 0 0.15rem;
+        }
+
+        .pool-item.crossed {
+            text-decoration: line-through;
+            color: #555;
+            opacity: 0.6;
+        }
+
         .amount-tier-1 { color: #aab8c5; }
         .amount-tier-2 { color: #8fc7e8; }
         .amount-tier-3 { color: #f5d742; }
         .amount-tier-4 { color: #ff9f4b; }
         .amount-tier-5 { color: #ff5e5e; text-shadow: 0 0 25px #ff0000; }
+
+        @media (max-width: 480px) {
+            .game-container { padding: 1.2rem 0.8rem; border-radius: 1.8rem; }
+            .title { font-size: 1.6rem; letter-spacing: 2px; }
+            .grid { gap: 0.6rem; }
+            .card-number { font-size: 2rem; }
+            .card-amount { font-size: 1rem; }
+            .card-amount small { font-size: 0.6rem; }
+            .card-status { font-size: 0.6rem; }
+            .message-area { font-size: 0.85rem; min-height: 2.5rem; }
+            .bid-box { font-size: 1.1rem; min-width: 100px; padding: 0.4rem 1rem; }
+            .bid-label { font-size: 0.7rem; }
+            .btn { padding: 0.6rem 1rem; font-size: 0.8rem; }
+            .footer-note { font-size: 0.65rem; }
+            .amount-pool { font-size: 1.05rem; gap: 0.4rem; }
+            .pool-item { font-size: 1.05rem; }
+        }
+
+        @media (max-width: 360px) {
+            .card-number { font-size: 1.7rem; }
+            .card-amount { font-size: 0.85rem; }
+            .title { font-size: 1.4rem; }
+            .amount-pool { font-size: 0.95rem; }
+            .pool-item { font-size: 0.95rem; }
+        }
     </style>
 </head>
 <body>
@@ -321,12 +359,14 @@
         </div>
         <div class="action-buttons" id="actionPanel"></div>
     </div>
-    <div class="footer-note">固定金额 · 1 · 10 · 50 · 100 · 200 · 300 · 400 · 500 · 1000</div>
+    <div class="footer-note">
+        <span>金额池：</span>
+        <span class="amount-pool" id="amountPool"></span>
+    </div>
 </div>
 
 <script>
     (function() {
-        // ========== 固定金额池 ==========
         const FIXED_AMOUNTS = [1, 10, 50, 100, 200, 300, 400, 500, 1000];
 
         const state = {
@@ -337,14 +377,15 @@
             bidCardId: null,
             canRespond: false,
             offerResolved: false,
+            crossedAmounts: [],
         };
 
         const gridEl = document.getElementById('cardGrid');
         const messageEl = document.getElementById('message');
         const bidDisplayEl = document.getElementById('bidDisplay');
         const actionPanelEl = document.getElementById('actionPanel');
+        const amountPoolEl = document.getElementById('amountPool');
 
-        // 洗牌算法（Fisher-Yates）
         function shuffle(arr) {
             const a = [...arr];
             for (let i = a.length - 1; i > 0; i--) {
@@ -354,23 +395,99 @@
             return a;
         }
 
-        // 生成游戏方出价（1-1000 分档随机，保留差异化）
-        function generateBidAmount() {
-            const r = Math.random();
-            if (r < 0.20) {
-                return Math.floor(Math.random() * 150) + 1;       // 1-150
-            } else if (r < 0.55) {
-                return Math.floor(Math.random() * 250) + 151;     // 151-400
-            } else if (r < 0.85) {
-                return Math.floor(Math.random() * 300) + 401;     // 401-700
-            } else if (r < 0.97) {
-                return Math.floor(Math.random() * 250) + 701;     // 701-950
+        // ========== 新版出价逻辑（分两层：先硬上限，再折扣） ==========
+        // 规则：
+        // 1. 计算 E = 剩余金额总和 ÷ 剩余数量（数学期望）
+        // 2. 计算 MAX = 剩余池中最大的金额（硬顶线）
+        // 3. 分支 A（1000还在池中）：E × 折扣，再 min(结果, MAX)
+        // 4. 分支 B（1000已被开出）：E × 更低折扣，再 min(结果, MAX)
+        // 5. 只剩1个：直接等于面值
+        function generateBidAmount(revealedCardAmount, bottomCandidates) {
+            const n = bottomCandidates.length;
+            if (n === 0) return revealedCardAmount;
+            if (n === 1) {
+                // 极限只剩1个：等于面值（没得博弈）
+                return bottomCandidates[0];
+            }
+
+            // 计算数学期望 E 和硬顶 MAX
+            const sum = bottomCandidates.reduce((a, b) => a + b, 0);
+            const E = sum / n;
+            const MAX = Math.max(...bottomCandidates);
+
+            // 是否1000还在池中
+            const hasGrandPrize = bottomCandidates.includes(1000);
+
+            let discount; // 折扣系数
+            if (hasGrandPrize) {
+                // ===== 分支 A：1000还在（玩家有幻想，折扣压低） =====
+                if (n >= 6) {
+                    // 剩 6~8 个（及9个）：0.60
+                    discount = 0.60;
+                } else if (n >= 3) {
+                    // 剩 3~5 个：0.70
+                    discount = 0.70;
+                } else { // n === 2
+                    // 剩 2 个：0.80
+                    discount = 0.80;
+                }
             } else {
-                return Math.floor(Math.random() * 50) + 951;      // 951-1000
+                // ===== 分支 B：1000已被开出（没有千奖幻想，折扣下调一档，严格锁上限） =====
+                if (n >= 5) {
+                    // 剩 5~7 个：0.55
+                    discount = 0.55;
+                } else if (n >= 3) {
+                    // 剩 3~4 个：0.65
+                    discount = 0.65;
+                } else { // n === 2
+                    // 剩 2 个：0.72
+                    discount = 0.72;
+                }
+            }
+
+            // 基础出价 = E × 折扣
+            let rawBid = E * discount;
+
+            // 硬上限：报价永远不超过剩余池中现存最大金额
+            rawBid = Math.min(rawBid, MAX);
+
+            // 同时保证出价不低于翻出卡片面值（这笔交易游戏方不赔）
+            rawBid = Math.max(rawBid, revealedCardAmount);
+
+            // 取整到漂亮数字
+            let rounded = roundToNice(rawBid);
+
+            // 再次确保：不低于翻出卡片面值，且不高于硬顶MAX
+            rounded = Math.max(rounded, revealedCardAmount);
+            rounded = Math.min(rounded, MAX);
+            rounded = Math.max(1, rounded);
+
+            return rounded;
+        }
+
+        // 取整到“漂亮数字”
+        function roundToNice(value) {
+            if (value >= 1000) {
+                return Math.round(value / 100) * 100;
+            } else if (value >= 200) {
+                return Math.round(value / 50) * 50;
+            } else if (value >= 50) {
+                return Math.round(value / 10) * 10;
+            } else if (value >= 10) {
+                return Math.round(value / 5) * 5;
+            } else {
+                return Math.round(value);
             }
         }
 
-        // 获取金额颜色等级
+        // 获取当前底牌的可能金额（从剩余金额池中排除已翻开的）
+        function getBottomCardCandidates() {
+            const revealedAmounts = state.cards
+                .filter(c => c.revealed && c.id !== state.selectedCardId)
+                .map(c => c.amount);
+            return FIXED_AMOUNTS.filter(a => !revealedAmounts.includes(a));
+        }
+
         function getAmountTierClass(amount) {
             if (amount <= 10) return 'amount-tier-1';
             if (amount <= 100) return 'amount-tier-2';
@@ -379,7 +496,6 @@
             return 'amount-tier-5';
         }
 
-        // 初始化9张卡片（固定金额池打乱分配）
         function initCards() {
             const shuffled = shuffle(FIXED_AMOUNTS);
             return shuffled.map((amount, index) => ({
@@ -397,6 +513,7 @@
             state.bidCardId = null;
             state.canRespond = false;
             state.offerResolved = false;
+            state.crossedAmounts = [];
 
             renderAll();
             setMessage('选择一张卡片作为你的底牌（金额池：1 / 10 / 50 / 100 / 200 / 300 / 400 / 500 / 1000）');
@@ -411,11 +528,21 @@
             return state.cards.find(c => c.id === id);
         }
 
-        // ---------- 渲染 ----------
         function renderAll() {
             renderGrid();
             renderActionPanel();
             renderBidDisplay();
+            renderAmountPool();
+        }
+
+        function renderAmountPool() {
+            amountPoolEl.innerHTML = '';
+            FIXED_AMOUNTS.forEach(amount => {
+                const span = document.createElement('span');
+                span.className = 'pool-item' + (state.crossedAmounts.includes(amount) ? ' crossed' : '');
+                span.textContent = amount;
+                amountPoolEl.appendChild(span);
+            });
         }
 
         function renderGrid() {
@@ -485,7 +612,7 @@
             } else if (state.gamePhase === 'offer' && state.canRespond) {
                 const acceptBtn = document.createElement('button');
                 acceptBtn.className = 'btn btn-primary';
-                acceptBtn.textContent = `成交 (${state.currentBid} 金币)`;
+                acceptBtn.textContent = `成交 (${state.currentBid})`;
                 acceptBtn.addEventListener('click', () => handleAcceptOffer());
 
                 const continueBtn = document.createElement('button');
@@ -526,7 +653,6 @@
             }
         }
 
-        // ---------- 游戏逻辑 ----------
         function handleCardClick(cardId) {
             if (state.gamePhase === 'finished') return;
 
@@ -553,6 +679,9 @@
                 }
 
                 card.revealed = true;
+                if (!state.crossedAmounts.includes(card.amount)) {
+                    state.crossedAmounts.push(card.amount);
+                }
                 triggerOffer(cardId);
                 renderAll();
                 return;
@@ -568,20 +697,16 @@
             const card = findCardById(cardId);
             if (!card) return;
 
-            const bidAmount = generateBidAmount();
+            const bottomCandidates = getBottomCardCandidates();
+            const bidAmount = generateBidAmount(card.amount, bottomCandidates);
+
             state.currentBid = bidAmount;
             state.bidCardId = cardId;
             state.gamePhase = 'offer';
             state.canRespond = true;
             state.offerResolved = false;
 
-            let bidDesc = '';
-            if (bidAmount > 800) bidDesc = '天价！';
-            else if (bidAmount > 500) bidDesc = '很有诚意！';
-            else if (bidAmount > 200) bidDesc = '中规中矩。';
-            else bidDesc = '有点抠门...';
-
-            setMessage(`游戏方对卡片 ${cardId} 出价 ${bidAmount} 金币（${bidDesc}）是否成交？`);
+            setMessage(`游戏方对卡片 ${cardId} 出价 ${bidAmount} 金币，是否成交？`);
             renderAll();
         }
 
@@ -601,10 +726,9 @@
             renderAll();
 
             let evaluation = '';
-            if (bidAmount > actualAmount * 1.5) evaluation = '🎉 大赚！你把白菜卖出了黄金价！';
-            else if (bidAmount > actualAmount) evaluation = '👍 小赚一笔，不错！';
-            else if (bidAmount > actualAmount * 0.7) evaluation = '😐 略亏，但还算能接受。';
-            else evaluation = '😭 亏大了！这张卡其实价值连城...';
+            if (bidAmount > actualAmount * 1.3) evaluation = '🎉 不错！赚了一笔！';
+            else if (bidAmount > actualAmount) evaluation = '👍 小赚一点，稳妥！';
+            else evaluation = '😐 刚好保本，不亏不赚。';
 
             setMessage(`✅ 成交！你以 ${bidAmount} 金币卖出了卡片 ${cardId}（实际金额 ${actualAmount} 金币）。${evaluation} 游戏结束。`);
             bidDisplayEl.textContent = `${bidAmount} 金币`;
@@ -628,11 +752,7 @@
                 return;
             }
 
-            let extraMsg = '';
-            if (rejectedBid > 700) extraMsg = '（你拒绝了天价出价，勇气可嘉...）';
-            else if (rejectedBid < 100) extraMsg = '（这出价确实太低，继续翻！）';
-
-            setMessage(`你拒绝了 ${rejectedBid} 金币的出价。${extraMsg} 请继续点击其他卡片翻开。`);
+            setMessage(`你拒绝了 ${rejectedBid} 金币的出价。请继续点击其他卡片翻开。`);
             renderAll();
         }
 
