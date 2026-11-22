@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>白日梦想家 · 九卡博弈</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(145deg, #0a0f1e 0%, #1a1f2e 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(20, 25, 40, 0.8);
+            backdrop-filter: blur(8px);
+            border-radius: 3rem;
+            padding: 2rem 1.5rem 2rem 1.5rem;
+            box-shadow: 0 25px 40px -10px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 215, 0, 0.2);
+            border: 1px solid rgba(255, 220, 100, 0.3);
+        }
+
+        .title {
+            text-align: center;
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: 4px;
+            color: #f5e6b0;
+            text-shadow: 0 0 15px #ffd966, 0 0 30px #b8860b;
+            margin-bottom: 0.5rem;
+            font-family: 'Times New Roman', serif;
+            word-break: break-word;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #bfb37b;
+            font-size: 0.9rem;
+            margin-bottom: 1.8rem;
+            letter-spacing: 2px;
+            font-style: italic;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.2rem;
+            margin: 1.5rem 0 1.8rem;
+        }
+
+        .card {
+            aspect-ratio: 3 / 4;
+            background: linear-gradient(135deg, #2a2f42, #1b1f2b);
+            border-radius: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255, 215, 0, 0.3);
+            border: 1px solid rgba(200, 170, 70, 0.4);
+            position: relative;
+            overflow: hidden;
+            font-weight: bold;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -30%;
+            left: -30%;
+            width: 160%;
+            height: 160%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.15) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s;
+            pointer-events: none;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 20px 30px -8px #000, 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .card.selected {
+            box-shadow: 0 0 0 3px #f5d742, 0 0 30px #ffb347;
+            transform: scale(1.02);
+            cursor: default;
+            background: linear-gradient(135deg, #3a3f5a, #252a3a);
+        }
+
+        .card.selected:hover {
+            transform: scale(1.02);
+        }
+
+        .card.revealed {
+            background: linear-gradient(135deg, #2d3142, #1f2332);
+            cursor: pointer;
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8), 0 0 0 1px #d4af37;
+        }
+
+        .card.revealed .card-number {
+            opacity: 0.4;
+        }
+
+        .card.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+            transform: none;
+        }
+
+        .card-number {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #e6d9a8;
+            text-shadow: 0 0 20px #ffd966, 0 0 5px #000;
+            line-height: 1;
+            transition: opacity 0.3s;
+            z-index: 2;
+        }
+
+        .card-amount {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #ffecb3;
+            text-shadow: 0 0 20px #f0b300, 0 0 5px #000;
+            margin-top: 0.4rem;
+            z-index: 2;
+            letter-spacing: 1px;
+        }
+
+        .card-amount small {
+            font-size: 1rem;
+            font-weight: 400;
+            color: #b8a664;
+            margin-left: 2px;
+        }
+
+        .card-status {
+            font-size: 0.8rem;
+            color: #b9a86b;
+            margin-top: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 2;
+        }
+
+        .info-panel {
+            background: #0e121c;
+            border-radius: 2rem;
+            padding: 1.5rem 1.2rem;
+            margin: 1rem 0 1.2rem;
+            border: 1px solid #3b3f2c;
+            box-shadow: inset 0 0 30px #00000055, 0 5px 10px #00000033;
+        }
+
+        .message-area {
+            font-size: 1.2rem;
+            min-height: 3.5rem;
+            text-align: center;
+            color: #ffefc0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            background: #121724;
+            border-radius: 1.5rem;
+            padding: 0.8rem 1rem;
+            margin-bottom: 1.2rem;
+            border-left: 4px solid #ffd966;
+            border-right: 4px solid #ffd966;
+            letter-spacing: 0.5px;
+            box-shadow: 0 0 15px #00000055;
+            word-break: break-word;
+        }
+
+        .bid-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .bid-box {
+            background: #1b1f2b;
+            border-radius: 2rem;
+            padding: 0.6rem 1.5rem;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #ffd966;
+            border: 1px solid #b8860b;
+            box-shadow: inset 0 0 15px #00000088, 0 0 15px #ffd96633;
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .bid-label {
+            font-size: 0.9rem;
+            color: #bdae76;
+            letter-spacing: 2px;
+            margin-right: 0.3rem;
+        }
+
+        .btn {
+            background: linear-gradient(145deg, #2b2f40, #1b1e2a);
+            border: 1px solid #bfa75c;
+            color: #f5e6b0;
+            font-weight: 700;
+            padding: 0.8rem 1.8rem;
+            border-radius: 3rem;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 6px 0 #0a0c12, 0 8px 20px #00000080;
+            text-transform: uppercase;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: linear-gradient(145deg, #3f445a, #262b3c);
+            box-shadow: 0 4px 0 #0a0c12, 0 10px 20px #00000080;
+            transform: translateY(2px);
+            border-color: #ffd966;
+            color: #fff3cf;
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #0a0c12, 0 5px 15px #000000;
+        }
+
+        .btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            box-shadow: 0 4px 0 #0a0c12;
+            transform: translateY(2px);
+            border-color: #5a5540;
+        }
+
+        .btn-primary {
+            background: linear-gradient(145deg, #5d4e1a, #3d3310);
+            border-color: #f5d742;
+            color: #ffefc0;
+            box-shadow: 0 6px 0 #1e1a09, 0 8px 20px #000000;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: linear-gradient(145deg, #7a6522, #4e4115);
+            border-color: #ffe066;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .reset-btn {
+            background: #1e212b;
+            border-color: #666;
+            color: #aaa;
+            box-shadow: 0 4px 0 #0a0c12;
+            padding: 0.6rem 1.6rem;
+            font-size: 0.85rem;
+        }
+
+        .reset-btn:hover:not(:disabled) {
+            background: #2e3140;
+            color: #ddd;
+        }
+
+        .footer-note {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #5a5e6b;
+            margin-top: 1.5rem;
+            letter-spacing: 1px;
+        }
+
+        /* 金额差异化视觉标记 */
+        .amount-tier-1 { color: #aab8c5; }
+        .amount-tier-2 { color: #8fc7e8; }
+        .amount-tier-3 { color: #f5d742; }
+        .amount-tier-4 { color: #ff9f4b; }
+        .amount-tier-5 { color: #ff5e5e; text-shadow: 0 0 25px #ff0000; }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="title">白日梦想家</div>
+    <div class="subtitle">✦ 九卡 · 抉择时刻 ✦</div>
+
+    <div class="grid" id="cardGrid"></div>
+
+    <div class="info-panel">
+        <div class="message-area" id="message">选择一张卡片作为你的底牌</div>
+        <div class="bid-area">
+            <span class="bid-label">游戏方出价</span>
+            <div class="bid-box" id="bidDisplay">—</div>
+        </div>
+        <div class="action-buttons" id="actionPanel"></div>
+    </div>
+    <div class="footer-note">固定金额 · 1 · 10 · 50 · 100 · 200 · 300 · 400 · 500 · 1000</div>
+</div>
+
+<script>
+    (function() {
+        // ========== 固定金额池 ==========
+        const FIXED_AMOUNTS = [1, 10, 50, 100, 200, 300, 400, 500, 1000];
+
+        const state = {
+            cards: [],
+            selectedCardId: null,
+            gamePhase: 'selecting',
+            currentBid: null,
+            bidCardId: null,
+            canRespond: false,
+            offerResolved: false,
+        };
+
+        const gridEl = document.getElementById('cardGrid');
+        const messageEl = document.getElementById('message');
+        const bidDisplayEl = document.getElementById('bidDisplay');
+        const actionPanelEl = document.getElementById('actionPanel');
+
+        // 洗牌算法（Fisher-Yates）
+        function shuffle(arr) {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        // 生成游戏方出价（1-1000 分档随机，保留差异化）
+        function generateBidAmount() {
+            const r = Math.random();
+            if (r < 0.20) {
+                return Math.floor(Math.random() * 150) + 1;       // 1-150
+            } else if (r < 0.55) {
+                return Math.floor(Math.random() * 250) + 151;     // 151-400
+            } else if (r < 0.85) {
+                return Math.floor(Math.random() * 300) + 401;     // 401-700
+            } else if (r < 0.97) {
+                return Math.floor(Math.random() * 250) + 701;     // 701-950
+            } else {
+                return Math.floor(Math.random() * 50) + 951;      // 951-1000
+            }
+        }
+
+        // 获取金额颜色等级
+        function getAmountTierClass(amount) {
+            if (amount <= 10) return 'amount-tier-1';
+            if (amount <= 100) return 'amount-tier-2';
+            if (amount <= 300) return 'amount-tier-3';
+            if (amount <= 600) return 'amount-tier-4';
+            return 'amount-tier-5';
+        }
+
+        // 初始化9张卡片（固定金额池打乱分配）
+        function initCards() {
+            const shuffled = shuffle(FIXED_AMOUNTS);
+            return shuffled.map((amount, index) => ({
+                id: index + 1,
+                amount: amount,
+                revealed: false,
+            }));
+        }
+
+        function resetGame() {
+            state.cards = initCards();
+            state.selectedCardId = null;
+            state.gamePhase = 'selecting';
+            state.currentBid = null;
+            state.bidCardId = null;
+            state.canRespond = false;
+            state.offerResolved = false;
+
+            renderAll();
+            setMessage('选择一张卡片作为你的底牌（金额池：1 / 10 / 50 / 100 / 200 / 300 / 400 / 500 / 1000）');
+            bidDisplayEl.textContent = '—';
+        }
+
+        function setMessage(text) {
+            messageEl.textContent = text;
+        }
+
+        function findCardById(id) {
+            return state.cards.find(c => c.id === id);
+        }
+
+        // ---------- 渲染 ----------
+        function renderAll() {
+            renderGrid();
+            renderActionPanel();
+            renderBidDisplay();
+        }
+
+        function renderGrid() {
+            gridEl.innerHTML = '';
+
+            for (let i = 1; i <= 9; i++) {
+                const card = findCardById(i);
+                if (!card) continue;
+
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'card';
+                if (state.selectedCardId === i) cardDiv.classList.add('selected');
+                if (card.revealed) cardDiv.classList.add('revealed');
+
+                const numSpan = document.createElement('div');
+                numSpan.className = 'card-number';
+                numSpan.textContent = i;
+
+                const isFinished = state.gamePhase === 'finished';
+                const isBottom = state.selectedCardId === i;
+
+                let showAmount = false;
+                if (isFinished) {
+                    showAmount = true;
+                } else if (card.revealed && !isBottom) {
+                    showAmount = true;
+                }
+
+                if (showAmount) {
+                    const amountDiv = document.createElement('div');
+                    amountDiv.className = `card-amount ${getAmountTierClass(card.amount)}`;
+                    const fire = card.amount >= 500 ? '🔥' : (card.amount >= 200 ? '💎' : '');
+                    amountDiv.innerHTML = `${card.amount}${fire ? '<small>'+fire+'</small>' : '<small>💰</small>'}`;
+                    cardDiv.appendChild(amountDiv);
+                } else {
+                    const statusDiv = document.createElement('div');
+                    statusDiv.className = 'card-status';
+                    if (isBottom) {
+                        statusDiv.textContent = '底牌';
+                    } else {
+                        statusDiv.textContent = '???';
+                    }
+                    cardDiv.appendChild(statusDiv);
+                }
+
+                cardDiv.prepend(numSpan);
+                cardDiv.addEventListener('click', () => handleCardClick(i));
+                gridEl.appendChild(cardDiv);
+            }
+        }
+
+        function renderActionPanel() {
+            actionPanelEl.innerHTML = '';
+
+            if (state.gamePhase === 'selecting') {
+                const resetBtn = document.createElement('button');
+                resetBtn.className = 'btn reset-btn';
+                resetBtn.textContent = '重新开始';
+                resetBtn.addEventListener('click', resetGame);
+                actionPanelEl.appendChild(resetBtn);
+            } else if (state.gamePhase === 'revealing') {
+                const resetBtn = document.createElement('button');
+                resetBtn.className = 'btn reset-btn';
+                resetBtn.textContent = '重新开始';
+                resetBtn.addEventListener('click', resetGame);
+                actionPanelEl.appendChild(resetBtn);
+            } else if (state.gamePhase === 'offer' && state.canRespond) {
+                const acceptBtn = document.createElement('button');
+                acceptBtn.className = 'btn btn-primary';
+                acceptBtn.textContent = `成交 (${state.currentBid} 金币)`;
+                acceptBtn.addEventListener('click', () => handleAcceptOffer());
+
+                const continueBtn = document.createElement('button');
+                continueBtn.className = 'btn';
+                continueBtn.textContent = '继续翻牌';
+                continueBtn.addEventListener('click', () => handleContinueReveal());
+
+                actionPanelEl.appendChild(acceptBtn);
+                actionPanelEl.appendChild(continueBtn);
+
+                const resetBtn = document.createElement('button');
+                resetBtn.className = 'btn reset-btn';
+                resetBtn.textContent = '重开';
+                resetBtn.addEventListener('click', resetGame);
+                actionPanelEl.appendChild(resetBtn);
+            } else if (state.gamePhase === 'finished') {
+                const resetBtn = document.createElement('button');
+                resetBtn.className = 'btn btn-primary';
+                resetBtn.textContent = '再玩一次';
+                resetBtn.addEventListener('click', resetGame);
+                actionPanelEl.appendChild(resetBtn);
+            } else {
+                const resetBtn = document.createElement('button');
+                resetBtn.className = 'btn reset-btn';
+                resetBtn.textContent = '重新开始';
+                resetBtn.addEventListener('click', resetGame);
+                actionPanelEl.appendChild(resetBtn);
+            }
+        }
+
+        function renderBidDisplay() {
+            if (state.currentBid !== null) {
+                bidDisplayEl.textContent = `${state.currentBid} 金币`;
+                bidDisplayEl.style.color = state.currentBid > 700 ? '#ff9f4b' : (state.currentBid > 300 ? '#ffd966' : '#b8a664');
+            } else {
+                bidDisplayEl.textContent = '—';
+                bidDisplayEl.style.color = '#ffd966';
+            }
+        }
+
+        // ---------- 游戏逻辑 ----------
+        function handleCardClick(cardId) {
+            if (state.gamePhase === 'finished') return;
+
+            const card = findCardById(cardId);
+            if (!card) return;
+
+            if (state.gamePhase === 'selecting') {
+                if (card.revealed) return;
+                state.selectedCardId = cardId;
+                state.gamePhase = 'revealing';
+                setMessage(`你选择了卡片 ${cardId} 作为底牌。现在点击其他卡片翻开，游戏方会出价回收。`);
+                renderAll();
+                return;
+            }
+
+            if (state.gamePhase === 'revealing') {
+                if (cardId === state.selectedCardId) {
+                    setMessage('这是你的底牌，不能翻开。请选择其他卡片。');
+                    return;
+                }
+                if (card.revealed) {
+                    setMessage('这张卡片已经翻开了，请选择其他卡片。');
+                    return;
+                }
+
+                card.revealed = true;
+                triggerOffer(cardId);
+                renderAll();
+                return;
+            }
+
+            if (state.gamePhase === 'offer') {
+                setMessage('请选择「成交」或「继续翻牌」');
+                return;
+            }
+        }
+
+        function triggerOffer(cardId) {
+            const card = findCardById(cardId);
+            if (!card) return;
+
+            const bidAmount = generateBidAmount();
+            state.currentBid = bidAmount;
+            state.bidCardId = cardId;
+            state.gamePhase = 'offer';
+            state.canRespond = true;
+            state.offerResolved = false;
+
+            let bidDesc = '';
+            if (bidAmount > 800) bidDesc = '天价！';
+            else if (bidAmount > 500) bidDesc = '很有诚意！';
+            else if (bidAmount > 200) bidDesc = '中规中矩。';
+            else bidDesc = '有点抠门...';
+
+            setMessage(`游戏方对卡片 ${cardId} 出价 ${bidAmount} 金币（${bidDesc}）是否成交？`);
+            renderAll();
+        }
+
+        function handleAcceptOffer() {
+            if (state.gamePhase !== 'offer' || !state.canRespond) return;
+            if (state.offerResolved) return;
+
+            const bidAmount = state.currentBid;
+            const cardId = state.bidCardId;
+            const card = findCardById(cardId);
+            const actualAmount = card ? card.amount : 0;
+
+            state.gamePhase = 'finished';
+            state.canRespond = false;
+            state.offerResolved = true;
+
+            renderAll();
+
+            let evaluation = '';
+            if (bidAmount > actualAmount * 1.5) evaluation = '🎉 大赚！你把白菜卖出了黄金价！';
+            else if (bidAmount > actualAmount) evaluation = '👍 小赚一笔，不错！';
+            else if (bidAmount > actualAmount * 0.7) evaluation = '😐 略亏，但还算能接受。';
+            else evaluation = '😭 亏大了！这张卡其实价值连城...';
+
+            setMessage(`✅ 成交！你以 ${bidAmount} 金币卖出了卡片 ${cardId}（实际金额 ${actualAmount} 金币）。${evaluation} 游戏结束。`);
+            bidDisplayEl.textContent = `${bidAmount} 金币`;
+        }
+
+        function handleContinueReveal() {
+            if (state.gamePhase !== 'offer' || !state.canRespond) return;
+            if (state.offerResolved) return;
+
+            const rejectedBid = state.currentBid;
+
+            state.offerResolved = true;
+            state.canRespond = false;
+            state.currentBid = null;
+            state.bidCardId = null;
+            state.gamePhase = 'revealing';
+
+            const availableCards = state.cards.filter(c => c.id !== state.selectedCardId && !c.revealed);
+            if (availableCards.length === 0) {
+                endGameNoMoreCards();
+                return;
+            }
+
+            let extraMsg = '';
+            if (rejectedBid > 700) extraMsg = '（你拒绝了天价出价，勇气可嘉...）';
+            else if (rejectedBid < 100) extraMsg = '（这出价确实太低，继续翻！）';
+
+            setMessage(`你拒绝了 ${rejectedBid} 金币的出价。${extraMsg} 请继续点击其他卡片翻开。`);
+            renderAll();
+        }
+
+        function endGameNoMoreCards() {
+            state.gamePhase = 'finished';
+            state.canRespond = false;
+
+            const bottomCard = findCardById(state.selectedCardId);
+            const bottomAmount = bottomCard ? bottomCard.amount : 0;
+            setMessage(`所有卡片已翻开，没有更多机会。你保留了底牌卡片 ${state.selectedCardId}，获得 ${bottomAmount} 金币。游戏结束。`);
+
+            renderAll();
+        }
+
+        resetGame();
+    })();
+</script>
+</body>
+</html>
