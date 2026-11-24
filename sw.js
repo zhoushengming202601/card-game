@@ -2,7 +2,7 @@
    策略：预缓存整个单页应用，导航请求优先走缓存（离线可玩），
    静态资源缓存优先并后台更新。改了游戏文件后把 VERSION 加一即可推送新版。 */
 
-const VERSION = 'v2.1.0';
+const VERSION = 'v2.2.0';
 const CACHE = 'jokagame-' + VERSION;
 
 const PRECACHE = [

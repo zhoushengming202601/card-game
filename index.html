@@ -369,15 +369,52 @@
             font-weight: 700;
             color: #f5e6b0;
             letter-spacing: 1px;
-            margin-bottom: 1rem;
+            margin-bottom: 0.6rem;
             text-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
+        }
+        /* 新增：卡片金额展示区 */
+        .modal-card-info {
+            background: rgba(255, 215, 0, 0.06);
+            border: 1px dashed rgba(255, 215, 0, 0.35);
+            border-radius: 1rem;
+            padding: 0.7rem 0.8rem;
+            margin-bottom: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .modal-card-info-label {
+            font-size: 0.85rem;
+            color: #bdae76;
+            letter-spacing: 1px;
+        }
+        .modal-card-info-value {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: #ffecb3;
+            text-shadow: 0 0 20px #f0b300, 0 0 5px #000;
+        }
+        .modal-card-info-value small {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #b8a664;
+        }
+        /* 报价展示区 */
+        .modal-bid-label {
+            font-size: 0.8rem;
+            color: #8fc7e8;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 0.2rem;
         }
         .modal-bid {
             font-size: 2.2rem;
             font-weight: 900;
             color: #ffd966;
             text-shadow: 0 0 25px #f0b300, 0 0 6px #000;
-            margin: 0.6rem 0 0.4rem;
+            margin: 0.2rem 0 1rem;
             letter-spacing: 1px;
         }
         .modal-desc {
@@ -482,6 +519,7 @@
             .pool-item { font-size: 1.05rem; }
             .modal-box { padding: 1.4rem 1rem 1.2rem; border-radius: 1.4rem; }
             .modal-title { font-size: 1.1rem; }
+            .modal-card-info-value { font-size: 1.3rem; }
             .modal-bid { font-size: 1.8rem; }
             .modal-desc { font-size: 0.85rem; }
             .modal-buttons .btn { font-size: 0.85rem; padding: 0.7rem 0.4rem; }
@@ -533,11 +571,21 @@
     </div>
 </div>
 
-<!-- 报价弹窗 -->
+<!-- 报价弹窗（增加翻出卡片金额展示） -->
 <div class="modal-overlay" id="offerModal">
     <div class="modal-box">
         <div class="modal-title">📢 游戏方报价</div>
+
+        <!-- 新增：翻出卡片金额 -->
+        <div class="modal-card-info">
+            <span class="modal-card-info-label">你翻出的卡片金额</span>
+            <span class="modal-card-info-value" id="modalCardAmount">— <small>金币</small></span>
+        </div>
+
+        <!-- 回收报价 -->
+        <div class="modal-bid-label">回收报价</div>
         <div class="modal-bid" id="modalBidAmount">—</div>
+
         <div class="modal-desc" id="modalDesc">你的卡片回收报价为 <b id="modalDescAmount">—</b>，是否成交？</div>
         <div class="modal-buttons">
             <button class="btn btn-primary" id="modalAcceptBtn">✅ 成交</button>
@@ -572,6 +620,7 @@
 
         // 弹窗元素
         const offerModal = document.getElementById('offerModal');
+        const modalCardAmount = document.getElementById('modalCardAmount');
         const modalBidAmount = document.getElementById('modalBidAmount');
         const modalDescAmount = document.getElementById('modalDescAmount');
         const modalAcceptBtn = document.getElementById('modalAcceptBtn');
@@ -766,7 +815,6 @@
                 resetBtn.addEventListener('click', resetGame);
                 actionPanelEl.appendChild(resetBtn);
             } else if (state.gamePhase === 'offer' && state.canRespond) {
-                // 报价阶段，按钮已在弹窗中，这里只放一个重开
                 const resetBtn = document.createElement('button');
                 resetBtn.className = 'btn reset-btn';
                 resetBtn.textContent = '重开';
@@ -798,7 +846,10 @@
         }
 
         // ====== 弹窗控制 ======
-        function showModal(bidAmount) {
+        function showModal(bidAmount, cardAmount) {
+            // 显示翻出的卡片金额
+            modalCardAmount.innerHTML = `${cardAmount} <small>金币</small>`;
+            // 显示报价
             modalBidAmount.textContent = bidAmount + ' 金币';
             modalDescAmount.textContent = bidAmount + ' 金币';
             offerModal.classList.add('active');
@@ -863,8 +914,8 @@
 
             setMessage(`游戏方对卡片 ${cardId} 出价 ${bidAmount} 金币，请在弹窗中做出选择。`);
             renderAll();
-            // 显示弹窗
-            showModal(bidAmount);
+            // 显示弹窗，同时传入卡片金额和报价
+            showModal(bidAmount, card.amount);
         }
 
         function handleAcceptOffer() {
@@ -938,7 +989,6 @@
                 alert('请输入9个数字，用逗号或空格分隔');
                 return;
             }
-            // 按逗号或空格分割
             const parts = raw.split(/[,，\s]+/).filter(s => s.length > 0);
             const nums = parts.map(s => Number(s));
 
